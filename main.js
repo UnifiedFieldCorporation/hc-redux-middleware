@@ -18,8 +18,8 @@ export function requestSendingMiddleware (store) {
   }
 }
 
-export function send (namespace, fnName, data) {
-    return axios.post(`/fn/${namespace}/${fnName}`, data)
+export function send (namespace, fnName, data, baseUrl) {
+    return axios.post(`${baseUrl}/fn/${namespace}/${fnName}`, data)
         .then(res => {
             if (typeof res.data === "string" && res.data.indexOf("Error") > -1) {
                 return Promise.reject(new Error(res.data))
@@ -36,7 +36,8 @@ export function hcMiddleware (store) {
         const { type, meta } = action
         if (!(meta && meta.isHc)) return next(action)
         // the rest will be handled by redux-promises
-        let sendRequest = send(meta.namespace, type, meta.data)
+        const baseUrl = meta.baseUrl || ''
+        let sendRequest = send(meta.namespace, type, meta.data, baseUrl)
         sendRequest = meta.then ? sendRequest.then(meta.then) : sendRequest
         const newAction = Object.assign({},
           action,

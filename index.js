@@ -36,8 +36,8 @@ function requestSendingMiddleware(store) {
   };
 }
 
-function send(namespace, fnName, data) {
-  return _axios2.default.post('/fn/' + namespace + '/' + fnName, data).then(function (res) {
+function send(namespace, fnName, data, baseUrl) {
+  return _axios2.default.post(baseUrl + '/fn/' + namespace + '/' + fnName, data).then(function (res) {
     if (typeof res.data === "string" && res.data.indexOf("Error") > -1) {
       return Promise.reject(new Error(res.data));
     }
@@ -55,7 +55,8 @@ function hcMiddleware(store) {
 
       if (!(meta && meta.isHc)) return next(action);
       // the rest will be handled by redux-promises
-      var sendRequest = send(meta.namespace, type, meta.data);
+      var baseUrl = meta.baseUrl || '';
+      var sendRequest = send(meta.namespace, type, meta.data, baseUrl);
       sendRequest = meta.then ? sendRequest.then(meta.then) : sendRequest;
       var newAction = Object.assign({}, action, {
         payload: sendRequest
