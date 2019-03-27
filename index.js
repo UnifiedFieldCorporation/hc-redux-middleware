@@ -1,6 +1,6 @@
 var axios = require('axios')
 
-exports.requestSendingMiddleware = function requestSendingMiddleware (store) {
+function requestSendingMiddleware (store) {
   return next => action => {
     const { payload, meta, type } = action
     // if its a network request
@@ -17,8 +17,9 @@ exports.requestSendingMiddleware = function requestSendingMiddleware (store) {
     return next(action)
   }
 }
+exports.requestSendingMiddleware = requestSendingMiddleware
 
-exports.send = function send (namespace, fnName, data, baseUrl) {
+function send (namespace, fnName, data, baseUrl) {
     // HACK append a localStorage saved password onto every request as the security model for now
     const pw = localStorage.getItem('touchpoints_pw')
     return axios.post(`${baseUrl}/fn/${namespace}/${fnName}?pw=${pw}`, data)
@@ -32,8 +33,9 @@ exports.send = function send (namespace, fnName, data, baseUrl) {
             console.log(err)
         })
 }
+exports.send = send
 
-exports.hcMiddleware = function hcMiddleware (store) {
+function hcMiddleware (store) {
     return next => action => {
         const { type, meta } = action
         if (!(meta && meta.isHc)) return next(action)
@@ -53,3 +55,4 @@ exports.hcMiddleware = function hcMiddleware (store) {
         return next(newAction)
     }
 }
+exports.hcMiddleware = hcMiddleware
